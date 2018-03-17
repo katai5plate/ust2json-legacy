@@ -25,6 +25,9 @@ function toJSON() {
             }
         }
         s.value = JSON.stringify(j);
+        console.log("-- OUTPUT --");
+        console.log(j);
+        console.log("------------");
     }catch(e){
         alert(`2json:\n${e.message}`);
     }
@@ -72,14 +75,3 @@ function toUST() {
         alert(`2ust:\n${e.message}`);
     }
 }
-
-/*
-[#VERSION]
-[#SETTING]
-[#PREV]
-[#0000]:数字の意味はなく、順序を評価
-([#INSERT]:数字の間)
-([#DELETE]:数字の代わり)
-[#NEXT]
-<[#TRACKEND]>
-*/
