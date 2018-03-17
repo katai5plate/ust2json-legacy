@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+    <head>
+        <title>UTAUコンバーター</title>
+        <meta charset="utf-8">
+        <style>
+            .btn{
+                width: 50%;
+                height: 50px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>UTAUコンバーター</h1>
+        <ol>
+            <li>UTA規格のファイルを貼る</li>
+            <li>変換ボタンを押す</li>
+            <li>JSONが生成される</li>
+        </ol>
+        <br><input type="button" class="btn" value="JSONに変換" onclick="toJSON()"/>
+        <br><input type="button" class="btn" value="USTに変換" onclick="toUST()"/>
+        <br><textarea id="source" cols="50" rows="25"></textarea>
+        <script src="./ust2json.js"></script>
+    </body>
+</html>
