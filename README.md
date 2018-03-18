@@ -52,7 +52,7 @@ var data = U2J.aggreNums(U2J.jget());
 U2J.clip(JSON.stringify(U2J.aggreNums(U2J.jget())));
 ```
 |構成|内容|
-|:-|:-||
+|:-|:-|
 |歌詞||
 |　＋－leng||
 |　＋－note||
