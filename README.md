@@ -51,3 +51,34 @@ var data = U2J.aggreNums(U2J.jget());
 ```js
 U2J.clip(JSON.stringify(U2J.aggreNums(U2J.jget())));
 ```
+|構成|内容|
+|:-|:-||
+|歌詞||
+|　＋－leng||
+|　＋－note||
+|　＋－preu||
+|　＋－overlap||
+|　＋－intensity||
+|　＋－mod||
+|　＋－stp||
+|　＋－env||
+|　｜　＋－p1||
+|　｜　＋－p2||
+|　｜　＋－p3||
+|　｜　＋－v1||
+|　｜　＋－v2||
+|　｜　＋－v3||
+|　｜　＋－v4||
+|　｜　＋－p4||
+|　｜　＋－v5||
+|　｜　＼－p5||
+|　｜||
+|　＋－velocity||
+|　＼－pit||
+|　　　＋－leng||
+|　　　＋－freq||
+|　　　＋－cent||
+|　　　＋－from||
+|　　　＋－to||
+|　　　＋－phase||
+|　　　＼－height||
