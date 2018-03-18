@@ -27,17 +27,27 @@ git clone https://github.com/katai5plate/ust2json
 
 ### 歌詞がすべて「あ」になる。
 mapNumを使うことで数字セッションの一括処理ができる。
-```
-U2J.send(U2J.mapNum(U2J.jget(),v=>{v.Lyric="あ"}));
+```js
+U2J.send(U2J.mapNums(U2J.jget(),v=>{v.Lyric="あ"}));
 ```
 
 ### プラマイ１２音階ランダムでずらす
-```
-U2J.send(U2J.mapNum(U2J.jget(),v=>{v.NoteNum+=((Math.random()*24)-12)>>0}));
+```js
+U2J.send(U2J.mapNums(U2J.jget(),v=>{v.NoteNum+=((Math.random()*24)-12)>>0}));
 ```
 
 ### エンベロープ情報を追記する
 配列ではなく文字列。
+```js
+U2J.send(U2J.mapNums(U2J.jget(),v=>{v.Envelope="0,20,146,0,181,97,0"}));
 ```
-U2J.send(U2J.mapNum(U2J.jget(),v=>{v.Envelope="0,20,146,0,181,97,0"}));
+
+### エンベロープ情報を分析する
+aggreNumsで数字セッションの分析ができる
+```js
+var data = U2J.aggreNums(U2J.jget());
+```
+このJSONをクリップボードにコピーする
+```js
+U2J.clip(JSON.stringify(U2J.aggreNums(U2J.jget())));
 ```

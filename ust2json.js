@@ -186,8 +186,199 @@ var U2J = U2J || {
     send:function(x){
         document.getElementById("source").value = typeof(x)=="object" ? JSON.stringify(x) : x;
     },
-    mapNum:function(data,param){
-        Object.keys(data).filter(v=>!isNaN(v)).forEach((v,i)=>{param(data[i].param)});
+    mapNums:function(data,param){
+        Object.keys(data).filter(v=>!isNaN(v)).forEach((v,i)=>{
+            let prev = null;
+            if(i>=0){
+                if(data[i-1]!=null){
+                    prev = data[i-1].param;
+                }
+            }
+            param(data[i].param,prev)
+        });
         return data;
+    },
+    aggreNums:function(data){
+        let out = [];
+        U2J.mapNums(data,v=>{
+            //if(v.Envelope){
+                const env = v.Envelope ? v.Envelope.split(",") : [];
+                const vbr = v.VBR ? v.VBR.split(",") : [];
+                out.push({
+                    lyric: v.Lyric,
+                    leng: v.Length || null,
+                    note: v.NoteNum || null,
+                    preu: v.PreUtterance || null,
+                    overlap: v.VoiceOverlap || null,
+                    intensity: v.Intensity || null,
+                    mod: v.Moduration || null,
+                    stp: v.StartPoint || v.STP || null,
+                    env:{
+                        text:v.Envelope || null,
+                        p1:env[0] ? Number(env[0]) : null,
+                        p2:env[1] ? Number(env[1]) : null,
+                        p3:env[2] ? Number(env[2]) : null,
+                        v1:env[3] ? Number(env[3]) : null,
+                        v2:env[4] ? Number(env[4]) : null,
+                        v3:env[5] ? Number(env[5]) : null,
+                        v4:env[6] ? Number(env[6]) : null,
+                        p4:env[8] ? Number(env[8]) : null,
+                        p5:env[9] ? Number(env[9]) : null,
+                        v5:env[10] ? Number(env[10]) : null,
+                    },
+                    velocity: v.Velocity || null,
+                    label: v.Label || null,
+                    pit:{
+                        type: v.PBType || null,
+                        pich: v.Pitches || v.Piches || null,
+                        pbs: v.PBS || null,
+                        pbw: v.PBW || null,
+                        pby: v.PBY || null,
+                        pbm: v.PBM || null,
+                        vbr:{
+                            text:v.VBR || null,
+                            leng:vbr[0] ? Number(vbr[0]) : null,
+                            freq:vbr[1] ? Number(vbr[1]) : null,
+                            cent:vbr[2] ? Number(vbr[2]) : null,
+                            from:vbr[3] ? Number(vbr[3]) : null,
+                            to:vbr[4] ? Number(vbr[4]) : null,
+                            phase:vbr[5] ? Number(vbr[5]) : null,
+                            height:vbr[6] ? Number(vbr[6]) : null,
+                            meta:vbr[7] ? Number(vbr[7]) : null,
+                        }
+                    },
+                });
+            //}
+        })
+        out = out.sort((a,b)=>{
+            a = a.lyric; b = b.lyric;
+            return a<b ? -1 : a>b ? 1 : 0;
+        });
+        let oprev = {};
+        for(const ocrr of out){
+            if(oprev[ocrr.lyric]==null) oprev[ocrr.lyric]={};
+            const label = ["leng","note","preu","overlap","intensity","mod","stp","env","velocity","pit",];
+            const lenv = ["p1","p2","p3","v1","v2","v3","v4","p4","v5","p5"];
+            const eret = {p1:0,p2:0,p3:0,v1:0,v2:0,v3:0,v4:0,p4:0,v5:0,p5:0};
+            // const lpit = ["type","pich","pbs","pbw","pby","pbm","vbr"];
+            // const pret = {type:0,pich:"",pbs:"",pbw:"",pby:"",pbm:"",vbr:{}};
+            const lpit2 = ["leng","freq","cent","from","to","phase","height"];
+            const pret2 = {leng:0,freq:0,cent:0,from:0,to:0,phase:0,height:0};
+            for(let pindex=0;pindex<label.length;pindex++){
+                const pkey = label[pindex];
+                let current = oprev[ocrr.lyric][pkey];
+                let ret = {};
+                if(current){
+                    current["value"].push(ocrr[pkey]);
+                    if(pkey=="env"){
+                        ret = eret;
+                        for(const index in current["value"]){
+                            for(const key of lenv){
+                                ret[key]+=current["value"][index][key]||0;
+                                if(index==current["value"].length-1){
+                                    ret[key]/=current["value"].length;
+                                    ret[key]=ret[key]>>0;
+                                }
+                            }
+                        }
+                        current["avr"] = ret;
+                    }else if(pkey=="pit"){
+                        // ビブラートのみ実装
+                        ret = pret2;
+                        for(const index in current["value"]){
+                            for(const key of lpit2){
+                                ret[key]+=current["value"][index][key]||0;
+                                if(index==current["value"].length-1){
+                                    ret[key]/=current["value"].length;
+                                    ret[key]=ret[key]>>0;
+                                }
+                            }
+                        }
+                        current["avr"] = {vbr:ret};
+                    }else{
+                        if(!this.arrIsAllNull(current["value"])){
+                            current["avr"] = current.value.reduce((p,c)=>p+(c||0));
+                            current["avr"] /= current.value.length;
+                            current["avr"] = current["avr"]>>0;
+                        }else{
+                            current["avr"] = null;
+                        }
+                    }
+                }else{
+                    oprev[ocrr.lyric][pkey]={
+                        value:[],
+                        avr:null,
+                    };
+                }
+            }
+        }
+        return oprev;
+    },
+    arrIsAllNull:function(x){
+        return x.reduce((p,c)=>{return c==null?p-1:p;},x.length)==0;
+    },
+    knDtct:function(char){
+        //連続音判定："o の".match(/[aiueo]\s/)
+        const vow=[
+            {name:"a",list:["あ","か","さ","た","な","は","ま","や","ら","わ","が","ざ","だ","ば","ぱ","ぁ","ゎ","ゃ"]},
+            {name:"i",list:["い","き","し","ち","に","ひ","み","り","ぎ","じ","ぢ","び","ぴ","ぃ"]},
+            {name:"u",list:["う","く","す","つ","ぬ","ふ","む","ゆ","る","ぐ","ず","づ","ぶ","ぷ","ゔ","ぅ","ゅ"]},
+            {name:"e",list:["え","け","せ","て","ね","へ","め","れ","げ","ぜ","で","べ","ぺ","ぇ"]},
+            {name:"o",list:["お","こ","そ","と","の","ほ","も","よ","ろ","を","ご","ぞ","ど","ぼ","ぽ","きょ","ぎょ","しょ","ちょ","ぢょ","にょ","ひょ","びょ","ぴょ","みょ","りょ","ぉ","ょ"]},
+            {name:"n",list:["ん"]},
+        ]
+        const cons=[
+            {name:"k",list:["か","き","く","け","こ"]},
+            {name:"s",list:["さ","し","す","せ","そ"]},
+            {name:"t",list:["た","ち","つ","て","と"]},
+            {name:"n",list:["な","に","ぬ","ね","の"]},
+            {name:"h",list:["は","ひ","ふ","へ","ほ"]},
+            {name:"m",list:["ま","み","む","め","も"]},
+            {name:"y",list:["や","ゆ","よ"]},
+            {name:"r",list:["ら","り","る","れ","ろ"]},
+            {name:"w",list:["わ","を"]},
+            {name:"g",list:["が","ぎ","ぐ","げ","ご"]},
+            {name:"z",list:["ざ","じ","ず","ぜ","ぞ"]},
+            {name:"d",list:["だ","ぢ","づ","で","ど"]},
+            {name:"b",list:["ば","び","ぶ","べ","ぼ","ゔ"]},
+            {name:"p",list:["ぱ","ぴ","ぷ","ぺ","ぽ"]},
+        ];
+        let r={head:{vow:null,cons:null},foot:{vow:null,cons:null}};
+        vow.forEach(v=>{
+            v.list.forEach(vv=>{
+                if(vv==char.substr(0,1)){
+                    r.head.vow=v.name;
+                }
+                if(vv==char.substr(-1,1)){
+                    r.foot.vow=v.name;
+                }
+            });
+        })
+        cons.forEach(v=>{
+            v.list.forEach(vv=>{
+                if(vv==char.substr(0,1)){
+                    r.head.cons=v.name;
+                }
+                if(vv==char.substr(-1,1)){
+                    r.foot.cons=v.name;
+                }
+            });
+        })
+        return r;
     }
 };
+
+if(false){
+    U2J.send(U2J.mapNums(U2J.jget(),(v,p)=>{
+        if(p!=null){
+            if(p.Lyric=="R"){
+                v.Lyric=`- ${v.Lyric}`;
+            }else{
+                console.log(U2J.knDtct(p.Lyric).head);
+                v.Lyric=`${U2J.knDtct(p.Lyric).head.vow} ${v.Lyric}`;
+            }
+        }else{
+            v.Lyric=`- ${v.Lyric}`;
+        }
+    }));
+}
