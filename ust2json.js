@@ -186,15 +186,9 @@ var U2J = U2J || {
     send:function(x){
         document.getElementById("source").value = typeof(x)=="object" ? JSON.stringify(x) : x;
     },
-    mapNums:function(data,param){
+    mapNums:function(data,mapf){
         Object.keys(data).filter(v=>!isNaN(v)).forEach((v,i)=>{
-            let prev = null;
-            if(i>=0){
-                if(data[i-1]!=null){
-                    prev = data[i-1].param;
-                }
-            }
-            param(data[i].param,prev)
+            mapf(data[i].param)
         });
         return data;
     },
@@ -258,12 +252,12 @@ var U2J = U2J || {
         for(const ocrr of out){
             if(oprev[ocrr.lyric]==null) oprev[ocrr.lyric]={};
             const label = ["leng","note","preu","overlap","intensity","mod","stp","env","velocity","pit",];
-            const lenv = ["p1","p2","p3","v1","v2","v3","v4","p4","v5","p5"];
-            const eret = {p1:0,p2:0,p3:0,v1:0,v2:0,v3:0,v4:0,p4:0,v5:0,p5:0};
+            const lenv = ["p1","p2","p3","v1","v2","v3","v4","p4","v5","p5","text"];
+            const eret = {p1:0,p2:0,p3:0,v1:0,v2:0,v3:0,v4:0,p4:0,v5:0,p5:0,text:""};
             // const lpit = ["type","pich","pbs","pbw","pby","pbm","vbr"];
             // const pret = {type:0,pich:"",pbs:"",pbw:"",pby:"",pbm:"",vbr:{}};
-            const lpit2 = ["leng","freq","cent","from","to","phase","height"];
-            const pret2 = {leng:0,freq:0,cent:0,from:0,to:0,phase:0,height:0};
+            const lpit2 = ["leng","freq","cent","from","to","phase","height","text"];
+            const pret2 = {leng:0,freq:0,cent:0,from:0,to:0,phase:0,height:0,text:""};
             for(let pindex=0;pindex<label.length;pindex++){
                 const pkey = label[pindex];
                 let current = oprev[ocrr.lyric][pkey];
@@ -274,10 +268,14 @@ var U2J = U2J || {
                         ret = eret;
                         for(const index in current["value"]){
                             for(const key of lenv){
-                                ret[key]+=current["value"][index][key]||0;
-                                if(index==current["value"].length-1){
-                                    ret[key]/=current["value"].length;
-                                    ret[key]=ret[key]>>0;
+                                if(key!="text"){
+                                    ret[key]+=current["value"][index][key]||0;
+                                    if(index==current["value"].length-1){
+                                        ret[key]/=current["value"].length;
+                                        ret[key]=ret[key]>>0;
+                                    }
+                                }else{
+                                    ret[key]=`${ret.p1},${ret.p2},${ret.p3},${ret.v1},${ret.v2},${ret.v3},${ret.v4},${ret.p4},${ret.v5},${ret.p5}`;
                                 }
                             }
                         }
@@ -287,10 +285,14 @@ var U2J = U2J || {
                         ret = pret2;
                         for(const index in current["value"]){
                             for(const key of lpit2){
-                                ret[key]+=current["value"][index][key]||0;
-                                if(index==current["value"].length-1){
-                                    ret[key]/=current["value"].length;
-                                    ret[key]=ret[key]>>0;
+                                if(key!="text"){
+                                    ret[key]+=current["value"][index][key]||0;
+                                    if(index==current["value"].length-1){
+                                        ret[key]/=current["value"].length;
+                                        ret[key]=ret[key]>>0;
+                                    }
+                                }else{
+                                    ret[key]=`${ret.leng},${ret.freq},${ret.cent},${ret.from},${ret.to},${ret.phase},${ret.height}`;
                                 }
                             }
                         }

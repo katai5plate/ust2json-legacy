@@ -51,6 +51,32 @@ var data = U2J.aggreNums(U2J.jget());
 ```js
 U2J.clip(JSON.stringify(U2J.aggreNums(U2J.jget())));
 ```
+
+### ニュアンスをコピーする
+予め変数dataにお手本となるaggreNumsデータをとっておく。
+エンベロープの正規化に注意。
+```js
+/* テキストエリアにお手本JSONがある場合 */
+//var data = U2J.aggreNums(U2J.jget());
+/* テキストエリアにお手本aggreNumsのJSONデータがある場合 */
+//var data=U2J.jget()
+U2J.send(U2J.mapNums(U2J.jget(),v=>{
+    Object.keys(data).forEach(l=>{
+        if(v.Lyric==l){
+            v.PreUtterance=data[l].preu.avr;
+            v.VoiceOverlap=data[l].overlap.avr;
+            v.Intensity=data[l].intensity.avr;
+            v.Moduration=data[l].mod.avr;
+            v.StartPoint=data[l].stp.avr;
+            v.Envelope=data[l].env.avr.text;
+            v.Velocity=data[l].velocity.avr;
+            v.VBR=data[l].pit.avr.vbr.text;
+            //v.NoteNum=data[l].note.avr;
+        }
+    })
+}));
+```
+
 #### 分析情報の内訳
 |構成|内容|
 |:-|:-|
@@ -89,3 +115,4 @@ U2J.clip(JSON.stringify(U2J.aggreNums(U2J.jget())));
 |　　　　　＋－to|出[0～100％]>20|
 |　　　　　＋－phase|位相[0～100％]>0|
 |　　　　　＼－height|高さ[0～100％]>0|
+
