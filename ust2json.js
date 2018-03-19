@@ -224,7 +224,8 @@ var U2J = U2J || {
                     label: v.Label || null,
                     pit:{
                         type: v.PBType || null,
-                        pich: v.Pitches || v.Piches || null,
+                        pich: v.Pitches ? v.Pitches.split(",").map(w=>Number(w)>>0) :
+                              v.Piches ? v.Piches.split(",").map(w=>Number(w)>>0) : null,
                         pbs: v.PBS || null,
                         pbw: v.PBW || null,
                         pby: v.PBY || null,
@@ -254,8 +255,8 @@ var U2J = U2J || {
             const label = ["leng","note","preu","overlap","intensity","mod","stp","env","velocity","pit",];
             const lenv = ["p1","p2","p3","v1","v2","v3","v4","p4","v5","p5","text"];
             const eret = {p1:0,p2:0,p3:0,v1:0,v2:0,v3:0,v4:0,p4:0,v5:0,p5:0,text:""};
-            // const lpit = ["type","pich","pbs","pbw","pby","pbm","vbr"];
-            // const pret = {type:0,pich:"",pbs:"",pbw:"",pby:"",pbm:"",vbr:{}};
+            const lpit = ["type","pich","pbs","pbw","pby","pbm","vbr"];
+            const pret = {type:0,pich:[],pbs:"",pbw:"",pby:"",pbm:"",vbr:{}};
             const lpit2 = ["leng","freq","cent","from","to","phase","height","text"];
             const pret2 = {leng:0,freq:0,cent:0,from:0,to:0,phase:0,height:0,text:""};
             for(let pindex=0;pindex<label.length;pindex++){
@@ -281,7 +282,32 @@ var U2J = U2J || {
                         }
                         current["avr"] = ret;
                     }else if(pkey=="pit"){
-                        // ビブラートのみ実装
+                        // ピッチ
+                        ret = pret;
+                        for(const index in current["value"]){
+                            for(const key of lpit){
+                                if(key!="pich"){
+                                    ret[key]+=current["value"][index][key]||0;
+                                    if(index==current["value"].length-1){
+                                        ret[key]/=current["value"].length;
+                                        ret[key]=ret[key]>>0;
+                                    }
+                                }else{
+                                    for(const pti in current["value"][index][key]){
+                                        ret[key][pti]= !ret[key][pti] ?
+                                                       current["value"][index][key][pti] :
+                                                       ret[key][pti]+(current["value"][index][key][pti]||0);
+                                    }
+                                }
+                            }
+                        }
+                        ret.pich = ret.pich.reduce((ptp,ptpc,ptpi)=>{
+                            ptp[ptpi]/=current["value"].length;
+                            ptp[ptpi]=ptp[ptpi]>>0
+                            return ptp;
+                        },ret.pich);
+                        current["avr"] = ret;
+                        // ビブラート
                         ret = pret2;
                         for(const index in current["value"]){
                             for(const key of lpit2){
@@ -296,7 +322,7 @@ var U2J = U2J || {
                                 }
                             }
                         }
-                        current["avr"] = {vbr:ret};
+                        current["avr"].vbr = ret;
                     }else{
                         if(!this.arrIsAllNull(current["value"])){
                             current["avr"] = current.value.reduce((p,c)=>p+(c||0));
