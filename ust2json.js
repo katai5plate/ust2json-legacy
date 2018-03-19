@@ -266,6 +266,7 @@ var U2J = U2J || {
                 if(current){
                     current["value"].push(ocrr[pkey]);
                     if(pkey=="env"){
+                        // エンベロープ
                         ret = eret;
                         for(const index in current["value"]){
                             for(const key of lenv){
@@ -277,6 +278,7 @@ var U2J = U2J || {
                                     }
                                 }else{
                                     ret[key]=`${ret.p1},${ret.p2},${ret.p3},${ret.v1},${ret.v2},${ret.v3},${ret.v4},${ret.p4},${ret.v5},${ret.p5}`;
+                                    ret[key]=ret[key]=="0,0,0,0,0,0,0,0,0,0"?"0,5,35,0,100,100,0,0,10,100":ret[key];
                                 }
                             }
                         }

@@ -53,34 +53,6 @@ U2J.clip(JSON.stringify(U2J.aggreNums(U2J.jget())));
 ```
 
 ### ニュアンスをコピーする
-予め変数dataにお手本となるaggreNumsデータをとっておく。
-エンベロープの正規化に注意。（エンベロープ正規化プラグイン使用推奨）
-```js
-/* テキストエリアにお手本JSONがある場合 */
-//var data = U2J.aggreNums(U2J.jget());
-/* テキストエリアにお手本aggreNumsのJSONデータがある場合 */
-//var data=U2J.jget()
-U2J.send(U2J.mapNums(U2J.jget(),v=>{
-    Object.keys(data).forEach(l=>{
-        if(v.Lyric==l){
-            v.PreUtterance=data[l].preu.avr;
-            v.VoiceOverlap=data[l].overlap.avr;
-            v.Intensity=data[l].intensity.avr;
-            v.Moduration=data[l].mod.avr;
-            v.StartPoint=data[l].stp.avr;
-            v.Envelope=data[l].env.avr.text;
-            v.Velocity=data[l].velocity.avr;
-            v.VBR=data[l].pit.avr.vbr.text;
-            v.PBType=5;
-            delete v.Pitches;
-            v.Piches=data[l].pit.avr.pich.join(",");
-            //v.NoteNum=data[l].note.avr;
-        }
-    })
-}));
-```
-
-#### コピー手順
 1. まず参考にしたいUSTファイルをメモ帳か何かで開きテキストエリアにコピペする
 2. 「UST to JSON」を押す
 3. コンソールを開き、以下を実行
@@ -99,12 +71,12 @@ U2J.send(U2J.mapNums(U2J.jget(),v=>{
             v.Intensity=data[l].intensity.avr;
             v.Moduration=data[l].mod.avr;
             v.StartPoint=data[l].stp.avr;
-            v.Envelope=data[l].env.avr.text;
-            v.Velocity=data[l].velocity.avr;
-            v.VBR=data[l].pit.avr.vbr.text;
+            v.Envelope=data[l].env.avr?data[l].env.avr.text:"";
+            v.Velocity=data[l].velocity.avr||100;
+            v.VBR=data[l].pit.avr?data[l].pit.avr.vbr.text:"";
             v.PBType=5;
             delete v.Pitches;
-            v.Piches=data[l].pit.avr.pich.join(",");
+            v.Piches=data[l].pit.avr?data[l].pit.avr.pich.join(","):"";
         }
     })
 }));
