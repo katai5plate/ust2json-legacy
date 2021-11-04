@@ -1,3 +1,13 @@
+# ！注意！ このプロジェクトは廃止・移転しました。
+
+!! IMPORTANT !! This project is out of date.
+
+## [新バージョンはこちら: https://github.com/katai5plate/ust2json](https://github.com/katai5plate/ust2json)
+
+The current version is here: https://github.com/katai5plate/ust2json
+
+---
+
 # ust2json
 Convert UTAU Sequence Text and JSON to each other. 
 
